@@ -13,7 +13,7 @@ func (u UseCase) GetCalcedSubscribes(ctx context.Context, request subscribe.GetC
 		return vErr, nil
 	}
 
-	pStat, err := u.repo.PriceStat(
+	pStat, err := u.repo.PriceStat(ctx,
 		(*model.ID)(request.Params.UserId),
 		(*model.ServiceName)(request.Params.ServiceName),
 		(*model.Date)(mustParsePDate(request.Params.StartDate)),

@@ -15,7 +15,7 @@ import (
 )
 
 func (u UseCase) GetSubscribe(ctx context.Context, request subscribe.GetSubscribeRequestObject) (subscribe.GetSubscribeResponseObject, error) {
-	var s, err = u.repo.Get(model.ID(request.Id))
+	var s, err = u.repo.Get(ctx, model.ID(request.Id))
 
 	if err != nil {
 		var sErr, ok = errors.AsType[*out.SubscribeError](err)

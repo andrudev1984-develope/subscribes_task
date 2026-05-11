@@ -23,7 +23,7 @@ func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSu
 		endDate = new(mustParseDate(request.Body.StartDate).AddDate(0, 1, 0))
 	}
 
-	err := u.repo.Save(
+	err := u.repo.Save(ctx,
 		model.Subscribe{
 			ID:          model.ID(request.Id),
 			UserId:      model.ID(request.Body.UserId),

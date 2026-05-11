@@ -38,7 +38,7 @@ type Pgrep struct {
 	db *pgxpool.Pool
 }
 
-func (p Pgrep) PriceStat(userId *model.ID, name *model.ServiceName, startDate *model.Date, endDate *model.Date) (int, error) {
+func (p Pgrep) PriceStat(ctx context.Context, userId *model.ID, name *model.ServiceName, startDate *model.Date, endDate *model.Date) (int, error) {
 	var pStat = sql.NullInt64{
 		Int64: 0,
 		Valid: false,
@@ -65,7 +65,7 @@ func (p Pgrep) PriceStat(userId *model.ID, name *model.ServiceName, startDate *m
 		cEndDate = time.Time(*endDate).Format(time.DateOnly)
 	}
 
-	err := p.db.QueryRow(context.Background(), getPriceStat,
+	err := p.db.QueryRow(ctx, getPriceStat,
 		cUserId,
 		cServiceName,
 		cStartDate,
@@ -142,13 +142,13 @@ func (p Pgrep) Create(ctx context.Context, subscribe model.Subscribe) (model.Sub
 	return model.Subscribe{ID: model.ID(crId)}, nil
 }
 
-func (p Pgrep) Get(id model.ID) (model.Subscribe, error) {
+func (p Pgrep) Get(ctx context.Context, id model.ID) (model.Subscribe, error) {
 	var subs model.Subscribe
 
 	var stDate pgtype.Date
 	var enDate pgtype.Date
 
-	err := p.db.QueryRow(context.Background(), getSingle, id).
+	err := p.db.QueryRow(ctx, getSingle, id).
 		Scan(&subs.ID, &subs.UserId, &subs.ServiceName, &subs.Price, &stDate, &enDate)
 
 	if err != nil {
@@ -170,8 +170,8 @@ func (p Pgrep) Get(id model.ID) (model.Subscribe, error) {
 	return subs, nil
 }
 
-func (p Pgrep) Save(subscribe model.Subscribe) error {
-	res, err := p.db.Exec(context.Background(), updateSingle,
+func (p Pgrep) Save(ctx context.Context, subscribe model.Subscribe) error {
+	res, err := p.db.Exec(ctx, updateSingle,
 		subscribe.UserId, subscribe.ServiceName, subscribe.Price,
 		pgtype.Date{
 			Time:             time.Time(subscribe.StartDate),
@@ -196,8 +196,8 @@ func (p Pgrep) Save(subscribe model.Subscribe) error {
 	return nil
 }
 
-func (p Pgrep) Delete(id model.ID) error {
-	res, err := p.db.Exec(context.Background(), deleteSingle, id)
+func (p Pgrep) Delete(ctx context.Context, id model.ID) error {
+	res, err := p.db.Exec(ctx, deleteSingle, id)
 
 	if err != nil {
 		return fmt.Errorf("database error %d: %w", id, err)

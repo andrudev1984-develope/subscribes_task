@@ -12,7 +12,7 @@ import (
 )
 
 func (u UseCase) DeleteSubscribe(ctx context.Context, request subscribe.DeleteSubscribeRequestObject) (subscribe.DeleteSubscribeResponseObject, error) {
-	var err = u.repo.Delete(model.ID(request.Id))
+	var err = u.repo.Delete(ctx, model.ID(request.Id))
 
 	if err != nil {
 		var sErr, ok = errors.AsType[*out.SubscribeError](err)
