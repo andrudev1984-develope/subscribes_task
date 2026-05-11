@@ -33,7 +33,13 @@ func (u UseCase) DeleteSubscribe(ctx context.Context, request subscribe.DeleteSu
 		slog.ErrorContext(ctx, fmt.Sprintf("subscribe with id %s delete problem", request.Id.String()),
 			"status", 500, "message", err.Error())
 
-		return nil, err
+		return subscribe.DeleteSubscribe500ApplicationProblemPlusJSONResponse{
+			Error: externalRef0.BaseError{
+				Code:    externalRef0.Internal,
+				Message: err.Error(),
+				Params:  nil,
+			},
+		}, nil
 	}
 
 	slog.InfoContext(ctx, fmt.Sprintf("subscribe with id %s is deleted", request.Id.String()))

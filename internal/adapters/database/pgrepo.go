@@ -72,10 +72,10 @@ func (p Pgrep) PriceStat(ctx context.Context, userId *model.ID, name *model.Serv
 		cEndDate).Scan(&pStat)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
-	return int(pStat.Int64), err
+	return int(pStat.Int64), nil
 }
 
 func (p Pgrep) List(ctx context.Context, pageSize int, page int) ([]model.Subscribe, error) {

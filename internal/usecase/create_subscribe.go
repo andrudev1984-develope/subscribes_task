@@ -18,7 +18,7 @@ const (
 )
 
 func (u UseCase) CreateSubscribe(ctx context.Context, request subscribe.CreateSubscribeRequestObject) (subscribe.CreateSubscribeResponseObject, error) {
-	if vErr := validateCBody(request.Body); vErr != nil {
+	if vErr := validateCreateRequest(request.Body); vErr != nil {
 		return vErr, nil
 	}
 
@@ -39,14 +39,16 @@ func (u UseCase) CreateSubscribe(ctx context.Context, request subscribe.CreateSu
 		})
 
 	if err != nil {
-		slog.ErrorContext(ctx, "create subscribe error", err)
+		slog.ErrorContext(ctx, "subscribe creating is failed",
+			"status", 500, "message", err.Error())
+
 		return subscribe.CreateSubscribe500ApplicationProblemPlusJSONResponse{
 			Error: externalRef0.BaseError{
 				Code:    externalRef0.Internal,
 				Message: err.Error(),
 				Params:  nil,
 			},
-		}, err
+		}, nil
 	}
 
 	slog.InfoContext(ctx, fmt.Sprintf("subscribe with id %s is created", uuid.UUID(s.ID).String()))
@@ -76,7 +78,7 @@ func mustParsePDate(date *string) *time.Time {
 	return new(pTime)
 }
 
-func validateCBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.CreateSubscribeResponseObject {
+func validateCreateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.CreateSubscribeResponseObject {
 	if body.UserId.String() == emptyUuid {
 		slog.Error("Need user id")
 
@@ -99,6 +101,20 @@ func validateCBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Cre
 				Error: externalRef0.BaseError{
 					Code:    externalRef0.BadRequest,
 					Message: "Need price",
+					Params:  nil,
+				},
+			},
+		}
+	}
+
+	if body.Price < 0 {
+		slog.Error("Price must be greater than zero")
+
+		return subscribe.CreateSubscribe400ApplicationProblemPlusJSONResponse{
+			ApiErrorResponse: externalRef0.ApiErrorResponse{
+				Error: externalRef0.BaseError{
+					Code:    externalRef0.BadRequest,
+					Message: "Price must be greater than zero",
 					Params:  nil,
 				},
 			},
@@ -133,7 +149,9 @@ func validateCBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Cre
 		}
 	}
 
-	if _, err := time.Parse("01-2006", body.StartDate); err != nil {
+	stDate, err := time.Parse("01-2006", body.StartDate)
+
+	if err != nil {
 		slog.Error("Start date format error. Need MM-YYYY")
 
 		return subscribe.CreateSubscribe400ApplicationProblemPlusJSONResponse{
@@ -148,14 +166,30 @@ func validateCBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Cre
 	}
 
 	if body.EndDate != nil && *body.EndDate != "" {
-		slog.Error("End date format error. Need MM-YYYY")
+		endDate, err := time.Parse("01-2006", *body.EndDate)
 
-		if _, err := time.Parse("01-2006", *body.EndDate); err != nil {
+		if err != nil {
+			slog.Error("End date format error. Need MM-YYYY")
+
 			return subscribe.CreateSubscribe400ApplicationProblemPlusJSONResponse{
 				ApiErrorResponse: externalRef0.ApiErrorResponse{
 					Error: externalRef0.BaseError{
 						Code:    externalRef0.BadRequest,
 						Message: "End date format error. Need MM-YYYY",
+						Params:  nil,
+					},
+				},
+			}
+		}
+
+		if !endDate.After(stDate) {
+			slog.Error("End date error. Need be after start date")
+
+			return subscribe.CreateSubscribe400ApplicationProblemPlusJSONResponse{
+				ApiErrorResponse: externalRef0.ApiErrorResponse{
+					Error: externalRef0.BaseError{
+						Code:    externalRef0.BadRequest,
+						Message: "End date error. Need be after start date",
 						Params:  nil,
 					},
 				},

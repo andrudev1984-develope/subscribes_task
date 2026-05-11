@@ -10,7 +10,7 @@ import (
 )
 
 func (u UseCase) GetSubscribesList(ctx context.Context, request subscribe.GetSubscribesListRequestObject) (subscribe.GetSubscribesListResponseObject, error) {
-	if eResp := validateGLRequest(request); eResp != nil {
+	if eResp := validateListRequest(request); eResp != nil {
 		return eResp, nil
 	}
 
@@ -45,7 +45,7 @@ func (u UseCase) GetSubscribesList(ctx context.Context, request subscribe.GetSub
 				Message: err.Error(),
 				Params:  nil,
 			},
-		}, err
+		}, nil
 	}
 
 	var subscribesOut = make([]subscribe.SubscribeOuInfo, len(subscribes))
@@ -67,7 +67,7 @@ func (u UseCase) GetSubscribesList(ctx context.Context, request subscribe.GetSub
 	return subscribe.GetSubscribesList200JSONResponse(subscribesOut), nil
 }
 
-func validateGLRequest(request subscribe.GetSubscribesListRequestObject) subscribe.GetSubscribesListResponseObject {
+func validateListRequest(request subscribe.GetSubscribesListRequestObject) subscribe.GetSubscribesListResponseObject {
 	if request.Params.PageSize != nil && *request.Params.PageSize <= 0 {
 		slog.Error("Page size must be greater than zero")
 

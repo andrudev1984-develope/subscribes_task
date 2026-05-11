@@ -1,11 +1,13 @@
 openapi: 3.0.0
+servers:
+  - url: http://localhost:8080
 info:
   title: Subscribe API
   version: 1.0.0
 paths:
   /subscribes:
     post:
-      summary: Creates the Subscribe
+      summary: Создание новой подписки
       operationId: createSubscribe
       tags:
         - subscribe
@@ -23,7 +25,7 @@ paths:
         default:
           $ref: "../common.yaml#/components/responses/ApiErrorResponse"
     get:
-      summary: Retrieve a list of Subscribes
+      summary: Получение списка подписок
       operationId: GetSubscribesList
       tags:
         - subscribe
@@ -48,7 +50,7 @@ paths:
 
   /subscribe/{id}:
     get:
-      summary: Retrieves specific Subscribe
+      summary: Получение данных конкретной подписки
       operationId: getSubscribe
       tags:
         - subscribe
@@ -73,14 +75,14 @@ paths:
         default:
           $ref: "../common.yaml#/components/responses/ApiErrorResponse"
     put:
-      summary: Update Subscribe information per ID
+      summary: Изменение данных подписки
       operationId: updateSubscribe
       tags:
         - subscribe
       parameters:
         - name: id
           in: path
-          description: Identifier of Subscribe (uuid)
+          description: Идентификатор подписки
           required: true
           example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
           schema:
@@ -100,7 +102,7 @@ paths:
         default:
           $ref: "../common.yaml#/components/responses/ApiErrorResponse"
     delete:
-      summary: Delete Subscribe information per ID
+      summary: Удаление данных подписки
       operationId: deleteSubscribe
       tags:
         - subscribe
@@ -126,7 +128,7 @@ paths:
           $ref: "../common.yaml#/components/responses/ApiErrorResponse"
   /subscribes/calc:
     get:
-      summary: Calc summary specific Subscribes
+      summary: Получение ценовой статистики по подпискам
       operationId: getCalcedSubscribes
       tags:
         - subscribe
@@ -176,17 +178,19 @@ components:
     PageNumber:
       name: pageNumber
       in: query
+      description: Номер страницы (начиная с единицы)
       required: false
-      schema: { type: integer, minimum: 1, default: 1}
+      schema: { type: integer, minimum: 1, default: 1 }
     PageSize:
       name: pageSize
+      description: Размер страницы (по умолчанию - 50)
       in: query
       required: false
       schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
 
   requestBodies:
     CreateSubscribeRequest:
-      description: Information for creating Subscribe
+      description: Данные для создания подписки
       required: true
       content:
         application/json:
@@ -194,7 +198,7 @@ components:
             $ref: "#/components/schemas/SubscribeInInfo"
 
     UpdateSubscribeRequest:
-      description: Information for updating Abonent
+      description: Данные для обновлени подписки
       required: true
       content:
         application/json:
@@ -247,8 +251,8 @@ components:
         service_name:
           type: string
           example: "Ivi"
-          maximum: 250
-          minimum: 10
+          maximum: 255
+          minimum: 1
           description: "Наименование сервиса"
         user_id:
           type: string

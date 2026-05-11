@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"subscribes/internal/domain/model"
 	"subscribes/internal/dto/out"
@@ -12,7 +13,7 @@ import (
 )
 
 func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSubscribeRequestObject) (subscribe.UpdateSubscribeResponseObject, error) {
-	if vErr := validateUBody(request.Body); vErr != nil {
+	if vErr := validateUpdateRequest(request.Body); vErr != nil {
 		return vErr, nil
 	}
 
@@ -37,6 +38,9 @@ func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSu
 		var sErr, ok = errors.AsType[*out.SubscribeError](err)
 
 		if ok {
+			slog.ErrorContext(ctx, fmt.Sprintf("subscribe with id %s delete problem", request.Id.String()),
+				"status", sErr.Code, "message", sErr.Error())
+
 			return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 				ApiErrorResponse: externalRef0.ApiErrorResponse{
 					Error: externalRef0.BaseError{
@@ -48,8 +52,19 @@ func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSu
 			}, nil
 		}
 
-		return nil, err
+		slog.ErrorContext(ctx, fmt.Sprintf("subscribe with id %s updating problem", request.Id.String()),
+			"status", 500, "message", err.Error())
+
+		return subscribe.UpdateSubscribe500ApplicationProblemPlusJSONResponse{
+			Error: externalRef0.BaseError{
+				Code:    externalRef0.Internal,
+				Message: err.Error(),
+				Params:  nil,
+			},
+		}, nil
 	}
+
+	slog.InfoContext(ctx, fmt.Sprintf("subscribe with id %s is updated", request.Id.String()))
 
 	return subscribe.UpdateSubscribe200JSONResponse{
 		GetSubscribeResponseJSONResponse: subscribe.GetSubscribeResponseJSONResponse{
@@ -63,7 +78,7 @@ func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSu
 	}, nil
 }
 
-func validateUBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.UpdateSubscribeResponseObject {
+func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.UpdateSubscribeResponseObject {
 	if body.UserId.String() == emptyUuid {
 		slog.Error("Need user id")
 
@@ -86,6 +101,20 @@ func validateUBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Upd
 				Error: externalRef0.BaseError{
 					Code:    "400",
 					Message: "Need price",
+					Params:  nil,
+				},
+			},
+		}
+	}
+
+	if body.Price < 0 {
+		slog.Error("Price must be greater than zero")
+
+		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
+			ApiErrorResponse: externalRef0.ApiErrorResponse{
+				Error: externalRef0.BaseError{
+					Code:    externalRef0.BadRequest,
+					Message: "Price must be greater than zero",
 					Params:  nil,
 				},
 			},
@@ -120,7 +149,9 @@ func validateUBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Upd
 		}
 	}
 
-	if _, err := time.Parse("01-2006", body.StartDate); err != nil {
+	stDate, err := time.Parse("01-2006", body.StartDate)
+
+	if err != nil {
 		slog.Error("Start date format error. Need MM-YYYY")
 
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
@@ -135,7 +166,9 @@ func validateUBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Upd
 	}
 
 	if body.EndDate != nil && *body.EndDate != "" {
-		if _, err := time.Parse("01-2006", *body.EndDate); err != nil {
+		endDate, err := time.Parse("01-2006", *body.EndDate)
+
+		if err != nil {
 			slog.Error("End date format error. Need MM-YYYY")
 
 			return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
@@ -143,6 +176,20 @@ func validateUBody(body *subscribe.CreateSubscribeJSONRequestBody) subscribe.Upd
 					Error: externalRef0.BaseError{
 						Code:    "400",
 						Message: "End date format error. Need MM-YYYY",
+						Params:  nil,
+					},
+				},
+			}
+		}
+
+		if !endDate.After(stDate) {
+			slog.Error("End date error. Need be after start date")
+
+			return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
+				ApiErrorResponse: externalRef0.ApiErrorResponse{
+					Error: externalRef0.BaseError{
+						Code:    externalRef0.BadRequest,
+						Message: "End date error. Need be after start date",
 						Params:  nil,
 					},
 				},

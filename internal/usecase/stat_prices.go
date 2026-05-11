@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 	"subscribes/internal/domain/model"
 	externalRef0 "subscribes/openapi"
 	"subscribes/openapi/subscribe"
@@ -9,7 +10,7 @@ import (
 )
 
 func (u UseCase) GetCalcedSubscribes(ctx context.Context, request subscribe.GetCalcedSubscribesRequestObject) (subscribe.GetCalcedSubscribesResponseObject, error) {
-	if vErr := validateGCRequest(request); vErr != nil {
+	if vErr := validateStatPricesRequest(request); vErr != nil {
 		return vErr, nil
 	}
 
@@ -20,6 +21,9 @@ func (u UseCase) GetCalcedSubscribes(ctx context.Context, request subscribe.GetC
 		(*model.Date)(mustParsePDate(request.Params.EndDate)))
 
 	if err != nil {
+		slog.ErrorContext(ctx, "getting subscribe prices is failed",
+			"status", 500, "message", err.Error())
+
 		return subscribe.GetCalcedSubscribes500ApplicationProblemPlusJSONResponse{
 			Error: externalRef0.BaseError{
 				Code:    externalRef0.Internal,
@@ -29,6 +33,8 @@ func (u UseCase) GetCalcedSubscribes(ctx context.Context, request subscribe.GetC
 		}, nil
 	}
 
+	slog.InfoContext(ctx, "getting subscribe prices is successes")
+
 	return subscribe.GetCalcedSubscribes200JSONResponse{
 		GetSubscribesPriceStatJSONResponse: subscribe.GetSubscribesPriceStatJSONResponse{
 			TotalPrice: pStat,
@@ -36,10 +42,13 @@ func (u UseCase) GetCalcedSubscribes(ctx context.Context, request subscribe.GetC
 	}, nil
 }
 
-func validateGCRequest(request subscribe.GetCalcedSubscribesRequestObject) subscribe.GetCalcedSubscribesResponseObject {
+func validateStatPricesRequest(request subscribe.GetCalcedSubscribesRequestObject) subscribe.GetCalcedSubscribesResponseObject {
 	if request.Params.StartDate != nil {
 		_, err := time.Parse("01-2006", *request.Params.StartDate)
+
 		if err != nil {
+			slog.Error("Start date format error. Need MM-YYYY")
+
 			return subscribe.GetCalcedSubscribes400ApplicationProblemPlusJSONResponse{
 				ApiErrorResponse: externalRef0.ApiErrorResponse{
 					Error: externalRef0.BaseError{
@@ -54,7 +63,10 @@ func validateGCRequest(request subscribe.GetCalcedSubscribesRequestObject) subsc
 
 	if request.Params.EndDate != nil {
 		_, err := time.Parse("01-2006", *request.Params.EndDate)
+
 		if err != nil {
+			slog.Error("End date format error. Need MM-YYYY")
+
 			return subscribe.GetCalcedSubscribes400ApplicationProblemPlusJSONResponse{
 				ApiErrorResponse: externalRef0.ApiErrorResponse{
 					Error: externalRef0.BaseError{
