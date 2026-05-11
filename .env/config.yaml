@@ -1,0 +1,8 @@
+db:
+  host: postgres
+  port: 5432
+  user: subscriber
+  password: 12345678
+  name: subscribes
+server:
+    port: 8080

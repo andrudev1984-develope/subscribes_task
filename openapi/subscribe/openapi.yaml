@@ -1,0 +1,300 @@
+openapi: 3.0.0
+info:
+  title: Subscribe API
+  version: 1.0.0
+paths:
+  /subscribes:
+    post:
+      summary: Creates the Subscribe
+      operationId: createSubscribe
+      tags:
+        - subscribe
+      requestBody:
+        $ref: "#/components/requestBodies/CreateSubscribeRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/GetSubscribeResponse"
+        "400":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "409":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "500":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+    get:
+      summary: Retrieve a list of Subscribes
+      operationId: GetSubscribesList
+      tags:
+        - subscribe
+      parameters:
+        - $ref: "#/components/parameters/PageNumber"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscribeOuInfo'
+        '400':
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        '500':
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+
+  /subscribe/{id}:
+    get:
+      summary: Retrieves specific Subscribe
+      operationId: getSubscribe
+      tags:
+        - subscribe
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор подписки
+          required: true
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          $ref: "#/components/responses/GetSubscribeResponse"
+        "400":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "404":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "500":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+    put:
+      summary: Update Subscribe information per ID
+      operationId: updateSubscribe
+      tags:
+        - subscribe
+      parameters:
+        - name: id
+          in: path
+          description: Identifier of Subscribe (uuid)
+          required: true
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateSubscribeRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetSubscribeResponse"
+        "400":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "404":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "500":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+    delete:
+      summary: Delete Subscribe information per ID
+      operationId: deleteSubscribe
+      tags:
+        - subscribe
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор подписки
+          required: true
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Subscribe is deleted
+        "400":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "404":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "500":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+  /subscribes/calc:
+    get:
+      summary: Calc summary specific Subscribes
+      operationId: getCalcedSubscribes
+      tags:
+        - subscribe
+      parameters:
+        - name: start_date
+          in: query
+          description: Дата начала периода отбора подписок
+          required: false
+          schema:
+            type: string
+            example: "12-2025"
+        - name: end_date
+          in: query
+          description: Дата окончания периода отбора подписок
+          required: false
+          schema:
+            type: string
+            example: "12-2026"
+        - name: user_id
+          in: query
+          description: Идентификатор пользователя для отбора подписок
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+        - name: service_name
+          in: query
+          description: Наименование сервиса
+          required: false
+          schema:
+            type: string
+            example: "Yandex plus"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetSubscribesPriceStat"
+        "400":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "404":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        "500":
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+        default:
+          $ref: "../common.yaml#/components/responses/ApiErrorResponse"
+components:
+  parameters:
+    PageNumber:
+      name: pageNumber
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, default: 1}
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+
+  requestBodies:
+    CreateSubscribeRequest:
+      description: Information for creating Subscribe
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SubscribeInInfo"
+
+    UpdateSubscribeRequest:
+      description: Information for updating Abonent
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SubscribeInInfo"
+
+  schemas:
+    SubscribeOuInfo:
+      type: object
+      required:
+        - id
+        - service_name
+        - user_id
+        - start_date
+        - price
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "Идентификатор подписки"
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+        service_name:
+          type: string
+          description: "Наименование сервиса"
+        user_id:
+          type: string
+          format: uuid
+          description: "Идентификатор пользователя"
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+        price:
+          type: integer
+          description: "Стоимость подписки"
+        start_date:
+          type: string
+          example: "07-2025"
+          description: "Дата начала действия подписки в формате ММ-ГГГГ"
+        end_date:
+          type: string
+          example: "07-2025"
+          description: "Дата окончания действия подписки в формате ММ-ГГГГ"
+
+    SubscribeInInfo:
+      type: object
+      required:
+        - service_name
+        - user_id
+        - start_date
+        - price
+      properties:
+        service_name:
+          type: string
+          example: "Ivi"
+          maximum: 250
+          minimum: 10
+          description: "Наименование сервиса"
+        user_id:
+          type: string
+          format: uuid
+          example: "fddbe0e5-7efd-4368-81f4-9cff9667c869"
+          description: "Идентификатор пользователя"
+        price:
+          type: integer
+          example: 10
+          minimum: 1
+          description: "Стоимость подписки"
+        start_date:
+          type: string
+          example: "07-2025"
+          description: "Дата начала действия подписки в формате ММ-ГГГГ"
+        end_date:
+          type: string
+          example: "07-2025"
+          description: "Дата окончания действия подписки в формате ММ-ГГГГ.Если не задана, то рассчитывается на основании даты начала подписки плюс месяц"
+    SubscribePricesStat:
+      type: object
+      required:
+        - total_price
+      properties:
+        total_price:
+          type: integer
+  responses:
+    GetSubscribesListResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubscribeOuInfo'
+
+    GetSubscribeResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscribeOuInfo'
+
+    GetSubscribesPriceStat:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscribePricesStat'
