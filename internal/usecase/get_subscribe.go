@@ -26,7 +26,7 @@ func (u UseCase) GetSubscribe(ctx context.Context, request subscribe.GetSubscrib
 
 			return subscribe.GetSubscribe404ApplicationProblemPlusJSONResponse{
 				Error: externalRef0.BaseError{
-					Code:    "404",
+					Code:    externalRef0.NotFound,
 					Message: sErr.Error(),
 					Params:  nil,
 				},

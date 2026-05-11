@@ -38,16 +38,14 @@ func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSu
 		var sErr, ok = errors.AsType[*out.SubscribeError](err)
 
 		if ok {
-			slog.ErrorContext(ctx, fmt.Sprintf("subscribe with id %s delete problem", request.Id.String()),
+			slog.ErrorContext(ctx, fmt.Sprintf("subscribe with id %s updating problem", request.Id.String()),
 				"status", sErr.Code, "message", sErr.Error())
 
-			return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
-				ApiErrorResponse: externalRef0.ApiErrorResponse{
-					Error: externalRef0.BaseError{
-						Code:    "404",
-						Message: sErr.Error(),
-						Params:  nil,
-					},
+			return subscribe.UpdateSubscribe404ApplicationProblemPlusJSONResponse{
+				Error: externalRef0.BaseError{
+					Code:    externalRef0.NotFound,
+					Message: sErr.Error(),
+					Params:  nil,
 				},
 			}, nil
 		}
@@ -85,7 +83,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 			ApiErrorResponse: externalRef0.ApiErrorResponse{
 				Error: externalRef0.BaseError{
-					Code:    "400",
+					Code:    externalRef0.BadRequest,
 					Message: "Need user id",
 					Params:  nil,
 				},
@@ -99,7 +97,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 			ApiErrorResponse: externalRef0.ApiErrorResponse{
 				Error: externalRef0.BaseError{
-					Code:    "400",
+					Code:    externalRef0.BadRequest,
 					Message: "Need price",
 					Params:  nil,
 				},
@@ -127,7 +125,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 			ApiErrorResponse: externalRef0.ApiErrorResponse{
 				Error: externalRef0.BaseError{
-					Code:    "400",
+					Code:    externalRef0.BadRequest,
 					Message: "Need service name",
 					Params:  nil,
 				},
@@ -141,7 +139,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 			ApiErrorResponse: externalRef0.ApiErrorResponse{
 				Error: externalRef0.BaseError{
-					Code:    "400",
+					Code:    externalRef0.BadRequest,
 					Message: "Need start date",
 					Params:  nil,
 				},
@@ -157,7 +155,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 			ApiErrorResponse: externalRef0.ApiErrorResponse{
 				Error: externalRef0.BaseError{
-					Code:    "400",
+					Code:    externalRef0.BadRequest,
 					Message: "Start date format error. Need MM-YYYY",
 					Params:  nil,
 				},
@@ -174,7 +172,7 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 			return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
 				ApiErrorResponse: externalRef0.ApiErrorResponse{
 					Error: externalRef0.BaseError{
-						Code:    "400",
+						Code:    externalRef0.BadRequest,
 						Message: "End date format error. Need MM-YYYY",
 						Params:  nil,
 					},

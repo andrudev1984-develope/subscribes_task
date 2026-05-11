@@ -23,7 +23,7 @@ func (u UseCase) DeleteSubscribe(ctx context.Context, request subscribe.DeleteSu
 
 			return subscribe.DeleteSubscribe404ApplicationProblemPlusJSONResponse{
 				Error: externalRef0.BaseError{
-					Code:    "404",
+					Code:    externalRef0.NotFound,
 					Message: sErr.Error(),
 					Params:  nil,
 				},
