@@ -8,6 +8,7 @@ import (
 	externalRef0 "subscribes/openapi"
 	"subscribes/openapi/subscribe"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	openapitypes "github.com/oapi-codegen/runtime/types"
@@ -129,6 +130,20 @@ func validateCreateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 				Error: externalRef0.BaseError{
 					Code:    externalRef0.BadRequest,
 					Message: "Need service name",
+					Params:  nil,
+				},
+			},
+		}
+	}
+
+	if utf8.RuneCountInString(body.ServiceName) > 255 {
+		slog.Error("Service name must be less or equal than 255 characters")
+
+		return subscribe.CreateSubscribe400ApplicationProblemPlusJSONResponse{
+			ApiErrorResponse: externalRef0.ApiErrorResponse{
+				Error: externalRef0.BaseError{
+					Code:    externalRef0.BadRequest,
+					Message: "Service name must be less or equal than 255 characters",
 					Params:  nil,
 				},
 			},

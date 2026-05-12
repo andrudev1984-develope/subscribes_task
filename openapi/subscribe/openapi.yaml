@@ -135,14 +135,14 @@ paths:
       parameters:
         - name: start_date
           in: query
-          description: Дата начала периода отбора подписок
+          description: Дата начала периода отбора подписок в формате ММ-ГГГГ
           required: false
           schema:
             type: string
             example: "12-2025"
         - name: end_date
           in: query
-          description: Дата окончания периода отбора подписок
+          description: Дата окончания периода отбора подписок в формате ММ-ГГГГ
           required: false
           schema:
             type: string
@@ -278,6 +278,7 @@ components:
         - total_price
       properties:
         total_price:
+          description: Суммарная стоимость всех подписок согласно заданным параметрам
           type: integer
   responses:
     GetSubscribesListResponse:

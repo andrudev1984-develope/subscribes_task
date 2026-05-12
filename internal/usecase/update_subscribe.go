@@ -10,6 +10,7 @@ import (
 	externalRef0 "subscribes/openapi"
 	"subscribes/openapi/subscribe"
 	"time"
+	"unicode/utf8"
 )
 
 func (u UseCase) UpdateSubscribe(ctx context.Context, request subscribe.UpdateSubscribeRequestObject) (subscribe.UpdateSubscribeResponseObject, error) {
@@ -127,6 +128,20 @@ func validateUpdateRequest(body *subscribe.CreateSubscribeJSONRequestBody) subsc
 				Error: externalRef0.BaseError{
 					Code:    externalRef0.BadRequest,
 					Message: "Need service name",
+					Params:  nil,
+				},
+			},
+		}
+	}
+
+	if utf8.RuneCountInString(body.ServiceName) > 255 {
+		slog.Error("Service name must be less or equal than 255 characters")
+
+		return subscribe.UpdateSubscribe400ApplicationProblemPlusJSONResponse{
+			ApiErrorResponse: externalRef0.ApiErrorResponse{
+				Error: externalRef0.BaseError{
+					Code:    externalRef0.BadRequest,
+					Message: "Service name must be less or equal than 255 characters",
 					Params:  nil,
 				},
 			},
