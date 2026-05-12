@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-openapi/runtime/server-middleware/docui"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -47,6 +48,11 @@ func main() {
 		Addr:    ":" + strconv.Itoa(appConfig.Server.Port),
 		Handler: httpAdapter,
 	}
+
+	swaggerUIHandler := docui.SwaggerUI(httpAdapter, docui.WithSpecURL("/openapi.yaml"))
+	httpAdapter.Handle("/docs", swaggerUIHandler)
+	httpAdapter.Handle("/openapi.yaml", http.FileServer(http.Dir("././openapi/subscribe")))
+	httpAdapter.Handle("/common.yaml", http.FileServer(http.Dir("././openapi")))
 
 	go func() {
 		log.Fatal(server.ListenAndServe())

@@ -7,6 +7,6 @@
 - docker-compose.yaml - Docker compose для локального запуска сервиса (запускаются контейнеры с БД и серверной частью сервиса)
 
 ## Запуск
-- Внести изменения в конфигурацию (если необходимо) в .env/config.yaml и docker-compose.yaml
 - Выполнить команду "docker compose up" в корне проекта
-### HTTP ручки будут доступны по адресам вида: http://localhost:8080/subscribes  
+### HTTP ручки будут доступны по адресам вида: http://localhost:8080/subscribes
+### Интерфейс Swagger UI доступен по адресу: http://localhost:8080/docs
